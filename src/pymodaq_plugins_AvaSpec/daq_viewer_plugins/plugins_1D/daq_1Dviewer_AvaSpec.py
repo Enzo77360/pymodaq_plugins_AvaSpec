@@ -7,13 +7,72 @@ from pymodaq.utils.data import DataFromPlugins, Axis, DataToExport
 import sys
 import time
 from msl.equipment import EquipmentRecord, ConnectionRecord, Backend
+from _ctypes import Structure
+from ctypes import CDLL, c_int, create_string_buffer, byref, c_ulong, c_char
+import os
 
+def get_spectrometers_list(dll_path):
+    dll = CDLL(dll_path)
 
+    try:
+        # Initialiser le SDK pour USB uniquement
+
+        result = dll.AVS_Init(c_int(0))  # 0 pour utiliser le port USB uniquement
+        if result <= 0:
+            print(f"Error initializing SDK: {result}")
+            return []
+
+        # Mettre à jour les périphériques USB
+        usb_result = dll.AVS_UpdateUSBDevices()
+
+        # Déterminer la taille du buffer nécessaire pour obtenir la liste des périphériques
+
+        list_size = c_ulong(0)
+        result = dll.AVS_GetList(c_ulong(0), byref(list_size), None)
+        if result != 0:
+            # Allouer le buffer pour la liste des périphériques
+            buffer_size = list_size.value
+            buffer = create_string_buffer(buffer_size)
+
+            # Obtenir la liste des périphériques
+            result = dll.AVS_GetList(c_ulong(buffer_size), byref(list_size), buffer)
+            if result != 0:
+                # Traiter la liste des périphériques
+                raw_data = buffer.raw
+                # Extraire les numéros de série
+                spectrometers = []
+                index = 0
+                while index < len(raw_data):
+                    # Extraire le numéro de série
+                    end_index = raw_data.find(b'U1', index)
+                    if end_index == -1:
+                        break
+                    serial_number = raw_data[index:end_index + 2].decode('utf-8', errors='ignore').strip('\x00')
+                    if serial_number:
+                        print(f"Spectrometer found with Serial Number: {serial_number}")
+                        spectrometers.append(serial_number)
+                    index = end_index + 2  # Passer à l'élément suivant
+
+                return spectrometers
+            else:
+                print("No devices found or error in getting the device list.")
+        else:
+            print("Error in determining buffer size.")
+
+    except Exception as e:
+        print(f"Exception occurred: {e}")
+
+    finally:
+        # Désactiver le SDK
+        dll.AVS_Done()
+
+    return []
 class DAQ_1DViewer_AvaSpec(DAQ_Viewer_base):
     """PyMoDAQ plugin controlling AvaSpec-2048L spectrometers using the Avantes SDK"""
 
     avaspec_dll_path = 'C:\\AvaSpecX64-DLL_9.14.0.0\\avaspecx64.dll'  # Update this path if necessary
-    avaspec_serial = '2206034U1'  # Update this serial number if necessary
+    spectro_names = get_spectrometers_list(avaspec_dll_path)
+    avaspec_serial = spectro_names[0]  # Update this serial number if necessary
     params = comon_parameters + [
         {'title': 'Avantes DLL path:', 'name': 'avaspec_dll_path', 'type': 'browsepath', 'value': avaspec_dll_path},
         {'title': 'Avantes Serial:', 'name': 'avaspec_serial', 'type': 'str', 'value': avaspec_serial},
@@ -105,7 +164,6 @@ class DAQ_1DViewer_AvaSpec(DAQ_Viewer_base):
             self.controller.disconnect()
 
     def grab_data(self, Naverage=1, **kwargs):
-        print("Starting data acquisition...")
 
         dte = DataToExport('Spectro')
 
@@ -114,47 +172,36 @@ class DAQ_1DViewer_AvaSpec(DAQ_Viewer_base):
             exposure_time = self.settings.child('spectrometers', 'spectro0', 'exposure_time').value()
 
             if grab_param:
-                print(f"Preparing measurement for {self.spectro_names[ind_spectro]}")
 
                 meas_cfg = self.controller.MeasConfigType()
                 meas_cfg.m_IntegrationTime = exposure_time
                 meas_cfg.m_NrAverages = Naverage
                 meas_cfg.m_StopPixel = self.controller.get_num_pixels() - 1
                 self.controller.prepare_measure(meas_cfg)
-
-                print(
-                    f"Configuration: Integration Time = {meas_cfg.m_IntegrationTime}, Averages = {meas_cfg.m_NrAverages}, Stop Pixel = {meas_cfg.m_StopPixel}")
-
                 self.controller.measure(1)
-                print("Measurement started, waiting for completion...")
-
                 start_time = time.time()
                 while not self.controller.poll_scan():
                     time.sleep(0.01)
                     if time.time() - start_time > 10:
-                        print("Measurement timeout")
+
                         break
 
                 tick_count, data = self.controller.get_data()
                 data_array = np.array(data)
-
-                print(f"Spectrometer: {self.spectro_names[ind_spectro]}")
-                print(f"Data (first 10 values): {data_array[:10]}")
-                print(f"Data (last 10 values): {data_array[-10:]}")
-                print(f"Data length: {len(data_array)}")
-                print(f"Tick count: {tick_count}")
-                print(f"Dark Pixel data: {self.controller.get_dark_pixel_data()}")
-
                 dte.append(DataFromPlugins(name=self.spectro_names[ind_spectro], data=[data_array], dim='Data1D'))
 
             QtWidgets.QApplication.processEvents()
 
         self.dte_signal.emit(dte)
-        print("Data emitted to signal")
+
 
     def stop(self):
         # No specific stop function provided in example script, assuming stopAveraging is not required for AvaSpec
         pass
+
+
+
+
 
 
 if __name__ == '__main__':
