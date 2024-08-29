@@ -1,7 +1,6 @@
-pymodaq_plugins_template
+pymodaq_plugins_AvaSpec
 ########################
 
-.. the following must be adapted to your developed package, links to pypi, github  description...
 
 .. image:: https://img.shields.io/pypi/v/pymodaq_plugins_template.svg
    :target: https://pypi.org/project/pymodaq_plugins_template/
