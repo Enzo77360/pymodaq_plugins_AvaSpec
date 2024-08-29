@@ -19,26 +19,14 @@ pymodaq_plugins_template
     :target: https://github.com/PyMoDAQ/pymodaq_plugins_template/actions/workflows/Test.yml
 
 
-Use this template to create a repository on your account and start the development of your own PyMoDAQ plugin!
 
+
+Ce plugin permet l'intégration des spectromètres Avantes dans la plateforme PyMoDAQ, offrant un contrôle précis et flexible de ces appareils pour vos applications de spectroscopie.
 
 Authors
 =======
 
-* First Author  (myemail@xxx.org)
-* Other author (myotheremail@xxx.org)
-
-.. if needed use this field
-
-    Contributors
-    ============
-
-    * First Contributor
-    * Other Contributors
-
-.. if needed use this field
-
-  Depending on the plugin type, delete/complete the fields below
+* Enzo Sebiane  (enzo.sebiane@orange.fr)
 
 
 Instruments
@@ -49,27 +37,20 @@ Below is the list of instruments included in this plugin
 Actuators
 +++++++++
 
-* **yyy**: control of yyy actuators
-* **xxx**: control of xxx actuators
 
 Viewer0D
 ++++++++
 
-* **yyy**: control of yyy 0D detector
-* **xxx**: control of xxx 0D detector
 
 Viewer1D
 ++++++++
 
-* **yyy**: control of yyy 1D detector
-* **xxx**: control of xxx 1D detector
+* **Avantes Spectrometer 2048-UL **
 
 
 Viewer2D
 ++++++++
 
-* **yyy**: control of yyy 2D detector
-* **xxx**: control of xxx 2D detector
 
 
 PID Models
@@ -82,6 +63,24 @@ Extensions
 
 Installation instructions
 =========================
+Pymodaq version -- 4.2.4 
+
+1. **Installation de la bibliothèque nécessaire** :
+
+   - Dans l'invite de commande Anaconda, exécutez la commande suivante :
+
+   .. code-block:: bash
+
+       pip install https://github.com/MSLNZ/msl-equipment/releases/download/v0.1.0/msl_equipment-0.1.0-py2.py3-none-any.whl
+
+2. **Installation du plugin** :
+
+   - Ensuite, exécutez la commande suivante :
+
+   .. code-block:: bash
+
+       pip install pymodaq-plugins-AvaSpec
+
 
 * PyMoDAQ’s version.
 * Operating system’s version.
