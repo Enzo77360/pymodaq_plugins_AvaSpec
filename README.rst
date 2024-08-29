@@ -45,7 +45,7 @@ Viewer0D
 Viewer1D
 ++++++++
 
-* **Avantes Spectrometer 2048-UL **
+**Avantes Spectrometer 2048-UL **
 
 
 Viewer2D
