@@ -14,11 +14,6 @@ pymodaq_plugins_AvaSpec
    :target: https://github.com/PyMoDAQ/pymodaq_plugins_template
    :alt: Publication Status
 
-.. image:: https://github.com/PyMoDAQ/pymodaq_plugins_template/actions/workflows/Test.yml/badge.svg
-    :target: https://github.com/PyMoDAQ/pymodaq_plugins_template/actions/workflows/Test.yml
-
-
-
 
 Ce plugin permet l'intégration des spectromètres Avantes dans la plateforme PyMoDAQ, offrant un contrôle précis et flexible de ces appareils pour vos applications de spectroscopie.
 
