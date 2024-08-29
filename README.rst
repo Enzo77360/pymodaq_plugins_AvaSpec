@@ -76,6 +76,3 @@ Pymodaq version -- 4.2.4
        pip install pymodaq-plugins-AvaSpec
 
 
-* PyMoDAQ’s version.
-* Operating system’s version.
-* What manufacturer’s drivers should be installed to make this plugin run?
